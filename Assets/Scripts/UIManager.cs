@@ -9,7 +9,8 @@ public class UIManager : MonoBehaviour
 
     private Image innerBarImage;
     private Transform playerTransform;
-    private Transform playerCanvasT;
+    private RectTransform playerCanvasT;
+    private Camera mainCamera;
     
     // Start is called before the first frame update
     void Start()
@@ -21,12 +22,13 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         if (playerTransform != null)
-        {
+        {                      
             float currentDistance = Mathf.Abs(Mathf.Clamp(playerTransform.position.x, -5.0f, 5.0f));
             //float currentDistance = playerTransform.position.x;
             //float absoluteDistance = Mathf.Abs(Mathf.Clamp(currentDistance, -5f, 5f));
-            float currentHP = Mathf.Clamp(1.0f / currentDistance, 0f, 1.0f);
-            Debug.Log("Distance away from zero is " + currentDistance + " and HP would be " + currentHP);
+            float currentHP = Mathf.Clamp((-0.2f * currentDistance) + 1, 0f, 1.0f);
+            //float currentHP = Mathf.Clamp(currentDistance / 1.0f + 1, 0f, 1.0f);
+            Debug.Log("Distance away from X zero is " + currentDistance + " and HP would be " + currentHP);
 
             innerBarImage.fillAmount = currentHP;
 
@@ -39,7 +41,13 @@ public class UIManager : MonoBehaviour
                 innerBarImage.color = Color.green;
             }
 
-            //Transform playerCanvas = innerBarImage.parent.parent;
+            //innerBarImage.rectTransform.rotation.x = Quaternion.Euler(45f, 0f, 0f);
+
+            //playerCanvasT = playerTransform.Find("PlayerCanvas")..GetComponent<RectTransform>();
+            //playerCanvasT.rotation.y = mainCamera.transform.rotation.y;
+            //playerCanvasT.LookAt(mainCamera.transform.rotation.y);
+            //playerCanvasT.Rotate(0f, mainCamera.transform.rotation.y, 0f);
+            playerCanvasT.SetPositionAndRotation(playerCanvasT.position, Quaternion.Euler(new Vector3(0f, mainCamera.transform.rotation.y, 0f)));// this one seems be working fine
             //innerBarImage.rectTransform.rotation = playerCanvasT.rotation;
         }
 
@@ -64,7 +72,9 @@ public class UIManager : MonoBehaviour
             Button quitButton = GameObject.FindWithTag("QuitButton").GetComponent<Button>();
             innerBarImage = GameObject.FindWithTag("PlayerHealthBar").GetComponent<Image>();
             playerTransform = GameObject.FindWithTag("Player").GetComponent<Transform>();
-            //playerCanvasT = innerBarImage.parent.parent;
+            //mainCamera = GameObject.FindWithTag("MainCamera");
+            mainCamera = Camera.main;
+            playerCanvasT = playerTransform.Find("PlayerCanvas").GetComponent<RectTransform>();
 
             quitButton.onClick.AddListener(QuitGame);
         }
