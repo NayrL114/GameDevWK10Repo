@@ -1,4 +1,4 @@
-//#define C70
+#define C70
 
 using System;
 using System.Collections;
