@@ -9,14 +9,17 @@ public class UIManager : MonoBehaviour
 
     private Image innerBarImage;
     private Transform playerTransform;
+
     private RectTransform playerCanvasT;
     private Camera mainCamera;
     //private Quaternion canvasAngle;
-    
+    public RectTransform loadingPanelT;
+
     // Start is called before the first frame update
     void Start()
     {
         DontDestroyOnLoad(gameObject);
+        loadingPanelT.sizeDelta = new Vector2(Screen.width, Screen.height);
     }
 
     // Update is called once per frame
@@ -78,7 +81,7 @@ public class UIManager : MonoBehaviour
             playerCanvasT.rotation = Quaternion.Euler(0f, playerCanvasT.rotation.eulerAngles.y, 0f);
 
             // I spend two days on the billboarding of HP bar and could not figure out anything, so I looked up some youtube tutorials. 
-            // How To... Billboarding in Unity 2020 - 2D Sprites in 3D, made by gamesplusjames https://www.youtube.com/watch?v=_LRZcmX_xw0. 
+            // How To... Billboarding in Unity 2020 - 2D Sprites in 3D, made by gamesplusjames, https://www.youtube.com/watch?v=_LRZcmX_xw0. 
         }
 
     }
@@ -107,5 +110,10 @@ public class UIManager : MonoBehaviour
 
             quitButton.onClick.AddListener(QuitGame);
         }
+    }
+
+    public void ShowLoadingScreen()
+    {
+        loadingPanelT.anchoredPosition = new Vector2(0.0f, 0.0f);
     }
 }
