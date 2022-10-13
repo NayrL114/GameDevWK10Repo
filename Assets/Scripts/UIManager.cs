@@ -15,9 +15,17 @@ public class UIManager : MonoBehaviour
     //private Quaternion canvasAngle;
     public RectTransform loadingPanelT;
 
+    private float lerpStartTime;
+    public float loadingPanelDurationTime;
+
     [SerializeField] public Tweener twn;
 
     // Start is called before the first frame update
+    void Awake()
+    {
+        loadingPanelMoveTime = 1f;
+    }
+    
     void Start()
     {
         DontDestroyOnLoad(gameObject);
@@ -26,7 +34,11 @@ public class UIManager : MonoBehaviour
         //loadingPanelT.Width = Screen.width;
         //loadingPanelT.Height = Screen.height;
         //HideLoadingScreen();
-        StartCoroutine(HideLoadingScreen());
+        lerpStartTime = Time.time;
+        //loadingPanelMoveTime = 1f;
+        //StartCoroutine(HideLoadingScreen());
+        HideLoadingScreen();
+
     }
 
     // Update is called once per frame
@@ -52,6 +64,12 @@ public class UIManager : MonoBehaviour
                 innerBarImage.color = Color.green;
             }
 
+            
+            //Debug.Log("Showing position data of loading panel during update()");
+            //Debug.Log("position is " + loadingPanelT.position);
+            //Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+            
+
             //canvasAngle.eulerAngles = new Vector3(0f, Mathf.Clamp(mainCamera.transform.rotation.y * 120, -180f, 180f), 0f);
 
             //Debug.Log(new Vector3(0f, mainCamera.transform.rotation.y, 0f));
@@ -74,7 +92,12 @@ public class UIManager : MonoBehaviour
             //Debug.Log(playerCanvasT.rotation);
 
             //playerCanvasT.LookAt(mainCamera.transform);
-            
+
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            HideLoadingScreen();
         }
 
 
@@ -97,9 +120,13 @@ public class UIManager : MonoBehaviour
     //IEnumerator LoadFirstLevel()
     {
         //ShowLoadingScreen();
-        StartCoroutine(ShowLoadingScreen());
-        //SceneManager.LoadScene(1);
-        SceneManager.sceneLoaded += OnSceneLoad;
+        lerpStartTime = Time.time;
+        ShowLoadingScreen();
+        //StartCoroutine(ShowLoadingScreen());
+
+        //SceneManager.LoadSceneAsync(1);
+        //SceneManager.sceneLoaded += OnSceneLoad;
+
         //HideLoadingScreen();
         //StartCoroutine(HideLoadingScreen());
     }
@@ -124,29 +151,146 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ShowLoadingScreen()
+    {
+        //float fractionTime = (Time.time - lerpStartTime) / 3f; // 0.5f is duration time
+        lerpStartTime = Time.time;
+        /* yield return */StartCoroutine(MoveLoadingScreen(new Vector2(loadingPanelT.anchoredPosition.x, loadingPanelT.anchoredPosition.y),
+            new Vector2(0.0f, 0.0f)));
+
+        Invoke("LoadLevel", 2f);
+        Invoke("HideLoadingScreen", 3f);
+        /*
+        yield return new WaitForSecondsRealtime(1.5f);
+        SceneManager.LoadSceneAsync(1);
+        StartCoroutine(HideLoadingScreen());
+        */
+    }
+
+    public void HideLoadingScreen()
+    {
+        Debug.Log("Starting hiding loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+
+        lerpStartTime = Time.time;
+
+        //yield return new WaitForSecondsRealtime(1f);
+        //float fractionTime = (Time.time - lerpStartTime) / 3f; // 0.5f is duration time
+        /*yield return */
+        StartCoroutine(MoveLoadingScreen(new Vector2(loadingPanelT.anchoredPosition.x, loadingPanelT.anchoredPosition.y),
+            new Vector2(loadingPanelT.anchoredPosition.x, - (Screen.height + 1f)))); /*-(Screen.height / 2) - 1f)*/
+
+        Debug.Log("Finished hiding loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+    }
+
+    IEnumerator MoveLoadingScreen(Vector2 startPosition, Vector2 endPosition)// vector2.lerp
+    {
+        while (loadingPanelT.anchoredPosition != endPosition)
+        {
+            //Debug.Log("Time.time is " + Time.time);
+            float fractionTime = (Time.time - lerpStartTime) / loadingPanelDurationTime; // 0.5f is duration time
+            //Debug.Log("And fractionTime is " + fractionTime);
+            //loadingPanelT.anchoredPosition = Vector2.Lerp(startPosition, endPosition, time);
+            loadingPanelT.anchoredPosition = Vector2.Lerp(startPosition, endPosition, fractionTime);
+            yield return null;
+        }
+        
+    }
+
+    //IEnumerator LoadLevel()
+    private void LoadLevel()
+    {
+        SceneManager.LoadSceneAsync(1);
+        //yield return null;
+    }
+
+
+    /* Below are the attempt of moving loadingPanel using tweener referencing the position of panel, not the anchored position. 
+
     //public void ShowLoadingScreen()
     IEnumerator ShowLoadingScreen()
     {
+
+        Debug.Log("Starting showing loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+
         //loadingPanelT.anchoredPosition = new Vector2(0.0f, 0.0f);
         twn.AddTween(loadingPanelT, new Vector3(loadingPanelT.position.x, loadingPanelT.position.y, 0.0f), 
             new Vector3(loadingPanelT.position.x, Screen.height / 2, 0.0f), 0.5f);
-        Debug.Log(loadingPanelT.anchoredPosition);
+
+        /*
+        float fractionTime = (Time.time - lerpStartTime) / 0.5f; // 0.5f is duration time
+        Debug.Log("Starting showing loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+        //loadingPanelT.anchoredPosition = Vector2.Lerp(new Vector2(loadingPanelT.position.x, loadingPanelT.position.y), new Vector2(0.0f, 0.0f), 0.5f);
+        //loadingPanelT.anchoredPosition = Vector2.Lerp(new Vector2(loadingPanelT.position.x, loadingPanelT.position.y), new Vector2(0.0f, 0.0f), fractionTime);
+        yield return StartCoroutine(MoveLoadingScreen(new Vector2(loadingPanelT.anchoredPosition.x, loadingPanelT.anchoredPosition.y), 
+            new Vector2(0.0f, 0.0f), fractionTime));
+        //StartCoroutine(MoveLoadingScreen());
+        Debug.Log("Finished showing loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+        //Debug.Log(loadingPanelT.anchoredPosition);
+
+        
+
+        Debug.Log("Finished showing loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+
         yield return new WaitForSecondsRealtime(1.5f);
         //yield return StartCoroutine(MoveLoadingPanelUp());
         SceneManager.LoadSceneAsync(1);
         StartCoroutine(HideLoadingScreen());
     }
 
-    //IEnumerator MoveLoadingPanelUp()
-    //{
-        //twn.AddTween(loadingPanelT, new Vector3(loadingPanelT.position.x, loadingPanelT.position.y, 0.0f), new Vector3(loadingPanelT.anchoredPosition.x, loadingPanelT.anchoredPosition.y, 0.0f), 0.5f);
-    //}
+    IEnumerator MoveLoadingScreen(Vector2 startPosition, Vector2 endPosition, float time)
+    {
+        loadingPanelT.anchoredPosition = Vector2.Lerp(startPosition, endPosition, time);
+        yield return null;
+    }    
 
     //public void HideLoadingScreen()
     IEnumerator HideLoadingScreen()
     {
+        Debug.Log("Starting hiding loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+
+
         //loadingPanelT.anchoredPosition = new Vector2(0.0f, Screen.height * 2);
         yield return new WaitForSecondsRealtime(1f);
-        twn.AddTween(loadingPanelT, new Vector3(loadingPanelT.position.x, loadingPanelT.position.y, 0.0f), new Vector3(loadingPanelT.position.x, - (Screen.height / 2), 0.0f), 0.5f);
+        twn.AddTween(loadingPanelT, new Vector3(loadingPanelT.position.x, loadingPanelT.position.y, 0.0f), 
+            new Vector3(loadingPanelT.position.x, - (Screen.height / 2) - 1f, 0.0f), 0.5f);
+
+
+        Debug.Log("Finished hiding loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+
+        /*
+        float fractionTime = (Time.time - lerpStartTime) / 0.5f; // 0.5f is duration time
+        Debug.Log("Starting hiding loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+        Debug.Log(fractionTime);
+        //loadingPanelT.anchoredPosition = Vector2.Lerp(new Vector2(loadingPanelT.position.x, loadingPanelT.position.y), new Vector2(0.0f, 0.0f), 0.5f);
+        //loadingPanelT.anchoredPosition = Vector2.Lerp(new Vector2(loadingPanelT.anchoredPosition.x, loadingPanelT.anchoredPosition.y), 
+        //new Vector2(loadingPanelT.anchoredPosition.x, -(Screen.height / 2) - 1f), fractionTime);
+
+        yield return StartCoroutine(MoveLoadingScreen(new Vector2(loadingPanelT.anchoredPosition.x, loadingPanelT.anchoredPosition.y), 
+            new Vector2(loadingPanelT.anchoredPosition.x, -(Screen.height / 2) - 1f), fractionTime));
+
+        Debug.Log("Finished hiding loading screen, following are the position data");
+        Debug.Log("position is " + loadingPanelT.position);
+        Debug.Log("anchoredPosition is " + loadingPanelT.anchoredPosition);
+        
     }
+
+    */
 }
