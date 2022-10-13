@@ -767,6 +767,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadingPanelT: {fileID: 1489347315}
+  loadingPanelDurationTime: 0
   twn: {fileID: 1788714846}
 --- !u!4 &1788714845
 Transform:
@@ -841,7 +842,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   studentNumber: 13940162
-  bandReached: 0
+  bandReached: 7
 --- !u!1 &1911215430
 GameObject:
   m_ObjectHideFlags: 0
