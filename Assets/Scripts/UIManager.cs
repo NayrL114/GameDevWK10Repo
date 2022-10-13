@@ -177,6 +177,7 @@ public class UIManager : MonoBehaviour
     private void LoadLevel()// Putting LoadSceneAsync(1) out seperately for 100%
     {
         SceneManager.LoadSceneAsync(1);
+        SceneManager.sceneLoaded += OnSceneLoad;
         //yield return null;
     }
     
